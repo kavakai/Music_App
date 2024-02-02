@@ -27,7 +27,7 @@ const Copyright = (props) => {
 
 const defaultTheme = createTheme();
 
-export const Login = (setIsLoggedIn) => {
+const Login = ({ setIsLoggedIn }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -111,3 +111,5 @@ export const Login = (setIsLoggedIn) => {
     </ThemeProvider>
   );
 }
+
+export default Login;
