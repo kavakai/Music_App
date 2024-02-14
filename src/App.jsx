@@ -1,38 +1,61 @@
-import { useState } from 'react'
-import './App.css'
-import Login from './Login'
+import React, { useEffect, useState } from 'react';
+import SpotifyWebApi from 'spotify-web-api-js';
 import Landing from './Landing';
-import { redirectToAuthCodeFlow, getAccessToken } from "./fetch_api/Fetch";
 
+const spotifyApi = new SpotifyWebApi();
 
-function App() {
+const getTokenFromUrl = () => {
+  const token = window.location.hash
+    .substring(1)
+    .split('&')
+    .reduce((initial, item) => {
+      let parts = item.split('=');
+      initial[parts[0]] = decodeURIComponent(parts[1]);
+      return initial;
+  }, {});
+  return token;
+};            
 
-const clientId = import.meta.env.VITE.CLIENT.ID;
-const params = new URLSearchParams(window.location.search);
-const code = params.get("code");
+const App = () => {
+  const [spotifyToken, setSpotifyToken] = useState('');
+  const [clicked, setClicked] = useState(false);
+  const [nowPLaying, setNowPlaying] = useState({});
+  const [loggedIn, setLoggedIn] = useState(false);
 
-if (!code) {
-    redirectToAuthCodeFlow(clientId);
-} else {
-    const accessToken = await getAccessToken(clientId, code);
-    const profile = await fetchProfile(accessToken);
-    populateUI(profile);
-}
+  useEffect(() => {
+    const token = getTokenFromUrl()?.access_token;
+    setSpotifyToken(token)
+    window.location.hash = '';
 
-async function fetchProfile(code){
-    const result = await fetch("https://api.spotify.com/v1/me", {
-        method: "GET", headers: { Authorization: `Bearer ${code}` }
+    if(token) {
+      // setSpotifyToken(spotifyToken);
+      spotifyApi.setAccessToken(token);
+      spotifyApi.getMe().then((res) => {
+        console.log(res, 'this is me')
+      });
+      setLoggedIn(true);
+    }
+  });
+
+  const getNowPlaying = (e) => {
+    e.preventDefault();
+    spotifyApi.getMyCurrentPlaybackState().then((res) => {
+      setNowPlaying({
+        device: res.device.id,
+        name: res.item.artists[0].name,
+        track: res.item.name,
+        albumArt: res.item.album.images[0].url,
+        uri: res.item.uri
+      })
     });
-
-    return await result.json();
-}
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  };
 
   return (
-    <>
-    { isLoggedIn ? <Landing /> : <Login setIsLoggedIn={setIsLoggedIn}/>}
-   </>
+    <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+      {!loggedIn && <a style={{textDecoration: 'none', margin: '100px'}} href='http://localhost:8888/'>Login to Spotify</a>}
+      {loggedIn && <Landing getCurrent={getNowPlaying} current={nowPLaying} spotifyApi={spotifyApi} />}
+    </div>
   )
 }
 
-export default App
+export default App;
