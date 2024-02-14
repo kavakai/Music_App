@@ -5,12 +5,12 @@ import Landing from './Landing'
 const spotifyApi = new SpotifyWebApi();
 
 const getTokenFromUrl = () => {
-  const token = window.location.hash
+    const token = window.location.search
     .substring(1)
     .split('&')
     .reduce((initial, item) => {
-      let parts = item.split('=');
-      initial[parts[0]] = decodeURIComponent(parts[1]);
+        let parts = item.split('=');
+        initial[parts[0]] = decodeURIComponent(parts[1]);
       return initial;
   }, {});
   return token;
@@ -23,12 +23,12 @@ const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = getTokenFromUrl()?.access_token;
+    const token = getTokenFromUrl()?.code;
     setSpotifyToken(token)
-    // window.location.hash = '';
-
+    // window.location.search = '';
+    
     if(token) {
-      // setSpotifyToken(spotifyToken);
+        // setSpotifyToken(spotifyToken);
       spotifyApi.setAccessToken(token);
       spotifyApi.getMe().then((res) => {
         console.log(res, 'this is me')
