@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import SpotifyWebApi from 'spotify-web-api-js';
-import Landing from './Landing';
+import Landing from './Landing'
 
 const spotifyApi = new SpotifyWebApi();
 
@@ -25,7 +25,7 @@ const App = () => {
   useEffect(() => {
     const token = getTokenFromUrl()?.access_token;
     setSpotifyToken(token)
-    window.location.hash = '';
+    // window.location.hash = '';
 
     if(token) {
       // setSpotifyToken(spotifyToken);
@@ -49,7 +49,7 @@ const App = () => {
       })
     });
   };
-
+  console.log(loggedIn, 'logged in')
   return (
     <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
       {!loggedIn && <a style={{textDecoration: 'none', margin: '100px'}} href='http://localhost:8888/'>Login to Spotify</a>}
